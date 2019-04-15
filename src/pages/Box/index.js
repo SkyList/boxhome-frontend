@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import api, { API_URL } from '../../services/api'
-import { MdInsertDriveFile } from 'react-icons/md'
+import { MdInsertDriveFile, MdDeleteForever } from 'react-icons/md'
 import { distanceInWords } from 'date-fns'
 import pt from 'date-fns/locale/pt'
 import Dropzone from 'react-dropzone'
@@ -29,7 +29,8 @@ export default class Box extends Component {
 
 	subscribeToNewFiles = () => {
 		const box = this.props.match.params.id
-		const io = socket.connect(API_URL)
+
+		const io = socket(API_URL)
 
 		io.emit('connectRoom', box)
 
@@ -57,6 +58,15 @@ export default class Box extends Component {
 		})
 	}
 
+	handleDelete = async (id) => {
+		const response = window.confirm('Deseja deletar este arquivo?')
+		if (response) {
+			const res = await api.delete(`file/${id}`)
+			res.data && window.location.reload()
+
+		}
+	}
+
 	render() {
 		return (
 			<div id='box-container'>
@@ -82,7 +92,12 @@ export default class Box extends Component {
 									<MdInsertDriveFile size={24} color='#a5cfff' />
 									<strong>{file.title}</strong>
 								</a>
-								<span>há {distanceInWords(file.createdAt, new Date(), { locale: pt })}</span>
+								<div>
+									<span>há {distanceInWords(file.createdAt, new Date(), { locale: pt })}</span>
+									<button onClick={() => this.handleDelete(file._id)}>
+										<MdDeleteForever size={24} color='#a5cfff' />
+									</button>
+								</div>
 							</li>
 						))
 					}
